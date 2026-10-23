@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Desk Flip Clock & Calendar</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      min-height: 100vh;
+      color: #37352f;
+    }
+
+    /* Flip Clock Container */
+    .flip-widget {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #ffffff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      user-select: none;
+    }
+
+    .flip-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .group-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #8c9aa7;
+    }
+
+    .cards-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* 3D Flip Card Container */
+    .flip-card {
+      position: relative;
+      width: 52px;
+      height: 64px;
+      perspective: 300px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(140, 154, 167, 0.25);
+    }
+
+    .flip-card.wide {
+      width: 68px;
+    }
+
+    .flip-card.narrow {
+      width: 48px;
+    }
+
+    /* Half Card Layout */
+    .card-top,
+    .card-bottom,
+    .card-flip-top,
+    .card-flip-bottom {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      overflow: hidden;
+      background: #8C9AA7; /* Slate Blue Theme */
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .card-top,
+    .card-flip-top {
+      top: 0;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .card-bottom,
+    .card-flip-bottom {
+      bottom: 0;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    /* Number Styling across halves */
+    .card-top span,
+    .card-bottom span,
+    .card-flip-top span,
+    .card-flip-bottom span {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 64px; /* Matches total card height */
+    }
+
+    .flip-card.wide span {
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .flip-card.narrow span {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .card-top span,
+    .card-flip-top span {
+      top: 0;
+    }
+
+    .card-bottom span,
+    .card-flip-bottom span {
+      bottom: 0;
+    }
+
+    /* Center Split Divider Line */
+    .flip-card::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.15);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+      z-index: 10;
+    }
+
+    /* 3D Animations */
+    .card-flip-top {
+      transform-origin: bottom;
+      backface-visibility: hidden;
+      z-index: 4;
+    }
+
+    .card-flip-bottom {
+      transform-origin: top;
+      backface-visibility: hidden;
+      z-index: 3;
+      transform: rotateX(90deg);
+    }
+
+    .flip-card.animate .card-flip-top {
+      animation: flipTop 0.3s ease-in forwards;
+    }
+
+    .flip-card.animate .card-flip-bottom {
+      animation: flipBottom 0.3s 0.3s ease-out forwards;
+    }
+
+    @keyframes flipTop {
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(-90deg); }
+    }
+
+    @keyframes flipBottom {
+      0% { transform: rotateX(90deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    /* Time Colon Separator */
+    .colon-separator {
+      font-size: 28px;
+      font-weight: 800;
+      color: #8C9AA7;
+      line-height: 1;
+      margin: 0 -2px;
+    }
+
+    .section-divider {
+      width: 1px;
+      height: 50px;
+      background: #ededed;
+      margin: 0 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="flip-widget">
+
+    <!-- DATE SECTION -->
+    <div class="flip-group">
+      <span class="group-label">Date</span>
+      <div class="cards-row">
+        <!-- Day Name -->
+        <div class="flip-card wide" id="card-day">
+          <div class="card-top"><span>---</span></div>
+          <div class="card-bottom"><span>---</span></div>
+          <div class="card-flip-top"><span>---</span></div>
+          <div class="card-flip-bottom"><span>---</span></div>
+        </div>
+        <!-- Month Name -->
+        <div class="flip-card wide" id="card-month">
+          <div class="card-top"><span>---</span></div>
+          <div class="card-bottom"><span>---</span></div>
+          <div class="card-flip-top"><span>---</span></div>
+          <div class="card-flip-bottom"><span>---</span></div>
+        </div>
+        <!-- Day Num -->
+        <div class="flip-card" id="card-date">
+          <div class="card-top"><span>00</span></div>
+          <div class="card-bottom"><span>00</span></div>
+          <div class="card-flip-top"><span>00</span></div>
+          <div class="card-flip-bottom"><span>00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- TIME SECTION -->
+    <div class="flip-group">
+      <span class="group-label">Time</span>
+      <div class="cards-row">
+        <!-- Hours -->
+        <div class="flip-card" id="card-hours">
+          <div class="card-top"><span>00</span></div>
+          <div class="card-bottom"><span>00</span></div>
+          <div class="card-flip-top"><span>00</span></div>
+          <div class="card-flip-bottom"><span>00</span></div>
+        </div>
+
+        <span class="colon-separator">:</span>
+
+        <!-- Minutes -->
+        <div class="flip-card" id="card-minutes">
+          <div class="card-top"><span>00</span></div>
+          <div class="card-bottom"><span>00</span></div>
+          <div class="card-flip-top"><span>00</span></div>
+          <div class="card-flip-bottom"><span>00</span></div>
+        </div>
+
+        <!-- AM/PM -->
+        <div class="flip-card narrow" id="card-ampm">
+          <div class="card-top"><span>AM</span></div>
+          <div class="card-bottom"><span>AM</span></div>
+          <div class="card-flip-top"><span>AM</span></div>
+          <div class="card-flip-bottom"><span>AM</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+    const currentValues = {};
+
+    function updateCard(cardId, newVal) {
+      if (currentValues[cardId] === newVal) return; // Only flip if value changed
+
+      const card = document.getElementById(cardId);
+      const topStatic = card.querySelector('.card-top span');
+      const bottomStatic = card.querySelector('.card-bottom span');
+      const topFlip = card.querySelector('.card-flip-top span');
+      const bottomFlip = card.querySelector('.card-flip-bottom span');
+
+      // Initial load without animation
+      if (!currentValues[cardId]) {
+        currentValues[cardId] = newVal;
+        topStatic.innerText = newVal;
+        bottomStatic.innerText = newVal;
+        topFlip.innerText = newVal;
+        bottomFlip.innerText = newVal;
+        return;
+      }
+
+      const oldVal = currentValues[cardId];
+      currentValues[cardId] = newVal;
+
+      // Set up flip layers
+      topStatic.innerText = newVal;
+      bottomStatic.innerText = oldVal;
+      topFlip.innerText = oldVal;
+      bottomFlip.innerText = newVal;
+
+      card.classList.remove('animate');
+      void card.offsetWidth; // Trigger reflow
+      card.classList.add('animate');
+
+      setTimeout(() => {
+        bottomStatic.innerText = newVal;
+      }, 600);
+    }
+
+    function updateClock() {
+      const now = new Date();
+
+      const dayName = days[now.getDay()];
+      const monthName = months[now.getMonth()];
+      const dayNum = String(now.getDate()).padStart(2, '0');
+
+      let hrs = now.getHours();
+      const ampmVal = hrs >= 12 ? 'PM' : 'AM';
+      hrs = hrs % 12;
+      hrs = hrs ? hrs : 12;
+      const hrsStr = String(hrs).padStart(2, '0');
+      const minsStr = String(now.getMinutes()).padStart(2, '0');
+
+      updateCard('card-day', dayName);
+      updateCard('card-month', monthName);
+      updateCard('card-date', dayNum);
+      updateCard('card-hours', hrsStr);
+      updateCard('card-minutes', minsStr);
+      updateCard('card-ampm', ampmVal);
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
